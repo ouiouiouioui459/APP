@@ -107,6 +107,49 @@ h2 {
   color: #888;
   margin-bottom: 8px;
 }
+.add-project {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.add-project input,
+.add-project textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-family: inherit;
+}
+.add-project textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+.add-project button {
+  align-self: flex-start;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #e25822;
+  color: #fff;
+  font-weight: bold;
+}
+.project-card {
+  background: #1e1e1e;
+  padding: 14px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 3px solid #e25822;
+}
+.project-card h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+}
+.project-card p {
+  margin: 0 0 8px 0;
+  font-style: italic;
+  color: #bbb;
+  white-space: pre-wrap;
+}
   </style>
 </head>
 <body>
@@ -133,6 +176,14 @@ h2 {
   <button id="add-note-btn">Ajouter</button>
 </div>
 <div id="notes-list"></div>
+
+<h2>Mes projets</h2>
+<div class="add-project">
+  <input type="text" id="new-project-title" placeholder="Nom du projet...">
+  <textarea id="new-project-why" placeholder="Pourquoi tu veux atteindre cet objectif ?"></textarea>
+  <button id="add-project-btn">Ajouter</button>
+</div>
+<div id="projects-list"></div>
 </div>
 
 <script>
@@ -340,6 +391,70 @@ h2 {
 
   loadNotes();
   renderNotes();
+
+    // --- Mes projets ---
+  const projectTitleInput = document.getElementById('new-project-title');
+  const projectWhyInput = document.getElementById('new-project-why');
+  const addProjectBtn = document.getElementById('add-project-btn');
+  const projectsList = document.getElementById('projects-list');
+
+  let projects = [];
+
+  function loadProjects() {
+    const saved = localStorage.getItem('braise-projects');
+    projects = saved ? JSON.parse(saved) : [];
+  }
+
+  function saveProjects() {
+    localStorage.setItem('braise-projects', JSON.stringify(projects));
+  }
+
+  function renderProjects() {
+    projectsList.innerHTML = '';
+    projects.forEach(project => {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = project.title;
+
+      const p = document.createElement('p');
+      p.textContent = project.why;
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '× Supprimer';
+      delBtn.className = 'delete-btn';
+      delBtn.addEventListener('click', () => deleteProject(project.id));
+
+      card.appendChild(h3);
+      card.appendChild(p);
+      card.appendChild(delBtn);
+      projectsList.appendChild(card);
+    });
+  }
+
+  function addProject() {
+    const title = projectTitleInput.value.trim();
+    const why = projectWhyInput.value.trim();
+    if (title === '') return;
+
+    projects.push({ id: Date.now(), title: title, why: why });
+    saveProjects();
+    renderProjects();
+    projectTitleInput.value = '';
+    projectWhyInput.value = '';
+  }
+
+  function deleteProject(id) {
+    projects = projects.filter(p => p.id !== id);
+    saveProjects();
+    renderProjects();
+  }
+
+  addProjectBtn.addEventListener('click', addProject);
+
+  loadProjects();
+  renderProjects();
 </script>
 </body>
 </html>
