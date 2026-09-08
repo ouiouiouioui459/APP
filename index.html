@@ -40,22 +40,20 @@
   color: #fff;
   font-weight: bold;
 }
-#task-list {
+.item-list {
   list-style: none;
   padding: 0;
 }
-#task-list li {
+.item-list li {
   background: #1e1e1e;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 8px;
-}
-#task-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-#task-list li.done span {
+.item-list li.done span {
   text-decoration: line-through;
   color: #888;
 }
@@ -65,6 +63,11 @@
   color: #888;
   font-size: 1.2rem;
   cursor: pointer;
+}
+h2 {
+  font-size: 1.1rem;
+  margin-top: 32px;
+  color: #e25822;
 }
   </style>
 </head>
@@ -77,7 +80,14 @@
     <button id="add-btn">Ajouter</button>
   </div>
 
-  <ul id="task-list"></ul>
+<ul id="task-list" class="item-list"></ul>
+
+    <h2>Routine quotidienne</h2>
+  <div class="add-task">
+    <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
+    <button id="add-routine-btn">Ajouter</button>
+  </div>
+  <ul id="routine-list" class="item-list"></ul>
 </div>
 
 <script>
@@ -146,6 +156,84 @@
 
   loadTasks();
   render();
+
+    // --- Routine quotidienne ---
+  const routineInput = document.getElementById('new-routine');
+  const addRoutineBtn = document.getElementById('add-routine-btn');
+  const routineList = document.getElementById('routine-list');
+
+  let routine = [];
+
+  function todayString() {
+    return new Date().toISOString().slice(0, 10); // ex: "2026-09-08"
+  }
+
+  function loadRoutine() {
+    const saved = localStorage.getItem('braise-routine');
+    routine = saved ? JSON.parse(saved) : [];
+
+    const lastDate = localStorage.getItem('braise-routine-date');
+    if (lastDate !== todayString()) {
+      routine.forEach(item => item.done = false);
+      localStorage.setItem('braise-routine-date', todayString());
+      saveRoutine();
+    }
+  }
+
+  function saveRoutine() {
+    localStorage.setItem('braise-routine', JSON.stringify(routine));
+  }
+
+  function renderRoutine() {
+    routineList.innerHTML = '';
+    routine.forEach(item => {
+      const li = document.createElement('li');
+      li.className = item.done ? 'done' : '';
+
+      const span = document.createElement('span');
+      span.textContent = item.text;
+      span.addEventListener('click', () => toggleRoutineItem(item.id));
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '×';
+      delBtn.className = 'delete-btn';
+      delBtn.addEventListener('click', () => deleteRoutineItem(item.id));
+
+      li.appendChild(span);
+      li.appendChild(delBtn);
+      routineList.appendChild(li);
+    });
+  }
+
+  function addRoutineItem() {
+    const text = routineInput.value.trim();
+    if (text === '') return;
+    routine.push({ id: Date.now(), text: text, done: false });
+    saveRoutine();
+    renderRoutine();
+    routineInput.value = '';
+  }
+
+  function toggleRoutineItem(id) {
+    const item = routine.find(r => r.id === id);
+    item.done = !item.done;
+    saveRoutine();
+    renderRoutine();
+  }
+
+  function deleteRoutineItem(id) {
+    routine = routine.filter(r => r.id !== id);
+    saveRoutine();
+    renderRoutine();
+  }
+
+  addRoutineBtn.addEventListener('click', addRoutineItem);
+  routineInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addRoutineItem();
+  });
+
+  loadRoutine();
+  renderRoutine();
 </script>
 </body>
 </html>
