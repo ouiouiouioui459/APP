@@ -204,6 +204,7 @@ h2 {
   <div id="page-routine" class="page active">
     <h2>Routine quotidienne</h2>
     <p id="routine-summary"></p>
+   <div id="brief-section"></div>
     <ul id="routine-list" class="item-list"></ul>
   </div>
 
@@ -310,7 +311,36 @@ h2 {
   loadTasks();
   render();
 
-      // --- Routine quotidienne ---
+// --- Brief du matin ---
+const DRIVE_API_KEY = 'AIzaSyCeU-mU3kGhP7ofJdw54Qd6g2thCJNlbRI';
+const DRIVE_FOLDER_ID = '1Ge8QOjOnjxz4Q5ux2oOx1WA0fW8YGMz2';
+
+function fetchLatestBrief() {
+  const listUrl = 'https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({
+    q: `'${DRIVE_FOLDER_ID}' in parents and trashed = false`,
+    orderBy: 'createdTime desc',
+    pageSize: '1',
+    fields: 'files(id)',
+    key: DRIVE_API_KEY
+  });
+
+  return fetch(listUrl)
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+      const fileId = data.files && data.files[0] && data.files[0].id;
+      if (!fileId) return Promise.reject();
+      return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`);
+    })
+    .then(res => res.ok ? res.json() : Promise.reject());
+}
+
+fetchLatestBrief()
+  .then(renderBrief)
+  .catch(() => {
+    document.getElementById('brief-section').innerHTML = '<p style="color:#888;">Brief pas encore disponible.</p>';
+  });
+
+// --- Routine quotidienne ---
   const routineList = document.getElementById('routine-list');
 
   const DEFAULT_ROUTINE = [
