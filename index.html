@@ -155,42 +155,97 @@ h2 {
   font-size: 0.9rem;
   margin: -8px 0 12px 0;
 }
+.app {
+  padding-bottom: 90px; /* laisse de la place pour la barre du bas */
+}
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+}
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  padding-bottom: env(safe-area-inset-bottom); /* évite la barre d'accueil iPhone */
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  color: #888;
+  font-family: inherit;
+}
+.nav-btn.active {
+  color: #e25822;
+}
+.nav-icon {
+  font-size: 1.4rem;
+}
+.nav-label {
+  font-size: 0.7rem;
+}
   </style>
 </head>
 <body>
-    <div class="app">
+<div class="app">
   <h1>BRAISE</h1>
 
-      <h2>Routine quotidienne</h2>
-      <p id="routine-summary"></p>
-  <div class="add-task">
-    <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
-    <button id="add-routine-btn">Ajouter</button>
-  </div>
-  <ul id="routine-list" class="item-list"></ul>
-
-  <div class="add-task">
-    <input type="text" id="new-task" placeholder="Nouvelle tâche...">
-    <button id="add-btn">Ajouter</button>
+  <div id="page-routine" class="page active">
+    <h2>Routine quotidienne</h2>
+    <p id="routine-summary"></p>
+    <div class="add-task">
+      <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
+      <button id="add-routine-btn">Ajouter</button>
+    </div>
+    <ul id="routine-list" class="item-list"></ul>
   </div>
 
-<ul id="task-list" class="item-list"></ul>
+  <div id="page-rest" class="page">
+    <h2>Tâches</h2>
+    <div class="add-task">
+      <input type="text" id="new-task" placeholder="Nouvelle tâche...">
+      <button id="add-btn">Ajouter</button>
+    </div>
+    <ul id="task-list" class="item-list"></ul>
 
-  <h2>Notes en vrac</h2>
-<div class="add-note">
-  <textarea id="new-note" placeholder="Écris une idée, un truc à ne pas oublier..."></textarea>
-  <button id="add-note-btn">Ajouter</button>
-</div>
-<div id="notes-list"></div>
+    <h2>Notes en vrac</h2>
+    <div class="add-note">
+      <textarea id="new-note" placeholder="Écris une idée, un truc à ne pas oublier..."></textarea>
+      <button id="add-note-btn">Ajouter</button>
+    </div>
+    <div id="notes-list"></div>
 
-<h2>Mes projets</h2>
-<div class="add-project">
-  <input type="text" id="new-project-title" placeholder="Nom du projet...">
-  <textarea id="new-project-why" placeholder="Pourquoi tu veux atteindre cet objectif ?"></textarea>
-  <button id="add-project-btn">Ajouter</button>
+    <h2>Mes projets</h2>
+    <div class="add-project">
+      <input type="text" id="new-project-title" placeholder="Nom du projet...">
+      <textarea id="new-project-why" placeholder="Pourquoi tu veux atteindre cet objectif ?"></textarea>
+      <button id="add-project-btn">Ajouter</button>
+    </div>
+    <div id="projects-list"></div>
+  </div>
 </div>
-<div id="projects-list"></div>
-</div>
+
+<nav id="bottom-nav">
+  <button class="nav-btn active" data-page="page-routine">
+    <span class="nav-icon">🔥</span>
+    <span class="nav-label">Routine</span>
+  </button>
+  <button class="nav-btn" data-page="page-rest">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Le reste</span>
+  </button>
+</nav>
 
 <script>
   const input = document.getElementById('new-task');
@@ -469,6 +524,18 @@ h2 {
     .then(() => console.log('Service worker enregistré'))
     .catch((err) => console.error('Erreur service worker', err));
 }
+
+  // --- Navigation par onglets ---
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const pages = document.querySelectorAll('.page');
+
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.page;
+      pages.forEach(page => page.classList.toggle('active', page.id === targetId));
+      navButtons.forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
 </script>
 </body>
 </html>

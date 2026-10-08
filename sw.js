@@ -1,4 +1,4 @@
-const CACHE_NAME = 'braise-v1';
+const CACHE_NAME = 'braise-v2';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const FILES_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); // active la nouvelle version tout de suite, sans attendre
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
   );
@@ -18,7 +19,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim()) // prend le contrôle des pages déjà ouvertes
   );
 });
 
