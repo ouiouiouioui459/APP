@@ -201,11 +201,15 @@ h2 {
 <div class="app">
   <h1>BRAISE</h1>
 
-  <div id="page-routine" class="page active">
+   <div id="page-routine" class="page active">
     <h2>Routine quotidienne</h2>
     <p id="routine-summary"></p>
-   <div id="brief-section"></div>
     <ul id="routine-list" class="item-list"></ul>
+  </div>
+
+  <div id="page-brief" class="page">
+    <h2>Brief du matin</h2>
+    <div id="brief-section"></div>
   </div>
 
   <div id="page-rest" class="page">
@@ -237,6 +241,10 @@ h2 {
   <button class="nav-btn active" data-page="page-routine">
     <span class="nav-icon">🔥</span>
     <span class="nav-label">Routine</span>
+  </button>
+  <button class="nav-btn" data-page="page-brief">
+    <span class="nav-icon">☀️</span>
+    <span class="nav-label">Brief</span>
   </button>
   <button class="nav-btn" data-page="page-rest">
     <span class="nav-icon">📋</span>
@@ -364,6 +372,18 @@ fetchLatestBrief()
   .catch(() => {
     document.getElementById('brief-section').innerHTML = '<p style="color:#888;">Brief pas encore disponible.</p>';
   });
+
+const routineList = document.getElementById('routine-list');
+
+const DEFAULT_ROUTINE = [
+  "Un grand verre d'eau",
+  "Le brief du matin",
+  "Manger",
+  "Sortir Tino",
+  "Sport",
+  "Check mail",
+  "Postulation"
+];
 
   let routine = [];
 
