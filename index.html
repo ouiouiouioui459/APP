@@ -204,10 +204,6 @@ h2 {
   <div id="page-routine" class="page active">
     <h2>Routine quotidienne</h2>
     <p id="routine-summary"></p>
-    <div class="add-task">
-      <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
-      <button id="add-routine-btn">Ajouter</button>
-    </div>
     <ul id="routine-list" class="item-list"></ul>
   </div>
 
@@ -314,37 +310,49 @@ h2 {
   loadTasks();
   render();
 
-    // --- Routine quotidienne ---
-  const routineInput = document.getElementById('new-routine');
-  const addRoutineBtn = document.getElementById('add-routine-btn');
+      // --- Routine quotidienne ---
   const routineList = document.getElementById('routine-list');
+
+  const DEFAULT_ROUTINE = [
+    "Un grand verre d'eau",
+    "Le brief du matin",
+    "Manger",
+    "Sortir Tino",
+    "Sport",
+    "Check mail",
+    "Postulation"
+  ];
 
   let routine = [];
 
   function todayString() {
-    return new Date().toISOString().slice(0, 10); // ex: "2026-09-08"
+    return new Date().toISOString().slice(0, 10);
   }
 
   function loadRoutine() {
-    const saved = localStorage.getItem('braise-routine');
-    routine = saved ? JSON.parse(saved) : [];
+    routine = DEFAULT_ROUTINE.map((text, index) => ({ id: index, text: text, done: false }));
 
     const lastDate = localStorage.getItem('braise-routine-date');
-    if (lastDate !== todayString()) {
-      routine.forEach(item => item.done = false);
+    if (lastDate === todayString()) {
+      const savedDone = JSON.parse(localStorage.getItem('braise-routine-done') || '[]');
+      routine.forEach(item => {
+        if (savedDone.includes(item.id)) item.done = true;
+      });
+    } else {
       localStorage.setItem('braise-routine-date', todayString());
       saveRoutine();
     }
   }
 
   function saveRoutine() {
-    localStorage.setItem('braise-routine', JSON.stringify(routine));
+    const doneIds = routine.filter(item => item.done).map(item => item.id);
+    localStorage.setItem('braise-routine-done', JSON.stringify(doneIds));
   }
 
   function renderRoutine() {
     routineList.innerHTML = '';
-      const doneCount = routine.filter(item => item.done).length;
-  document.getElementById('routine-summary').textContent = `${doneCount}/${routine.length} faites`;
+    const doneCount = routine.filter(item => item.done).length;
+    document.getElementById('routine-summary').textContent = `${doneCount}/${routine.length} faites`;
     routine.forEach(item => {
       const li = document.createElement('li');
       li.className = item.done ? 'done' : '';
@@ -353,24 +361,9 @@ h2 {
       span.textContent = item.text;
       span.addEventListener('click', () => toggleRoutineItem(item.id));
 
-      const delBtn = document.createElement('button');
-      delBtn.textContent = '×';
-      delBtn.className = 'delete-btn';
-      delBtn.addEventListener('click', () => deleteRoutineItem(item.id));
-
       li.appendChild(span);
-      li.appendChild(delBtn);
       routineList.appendChild(li);
     });
-  }
-
-  function addRoutineItem() {
-    const text = routineInput.value.trim();
-    if (text === '') return;
-    routine.push({ id: Date.now(), text: text, done: false });
-    saveRoutine();
-    renderRoutine();
-    routineInput.value = '';
   }
 
   function toggleRoutineItem(id) {
@@ -379,17 +372,6 @@ h2 {
     saveRoutine();
     renderRoutine();
   }
-
-  function deleteRoutineItem(id) {
-    routine = routine.filter(r => r.id !== id);
-    saveRoutine();
-    renderRoutine();
-  }
-
-  addRoutineBtn.addEventListener('click', addRoutineItem);
-  routineInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addRoutineItem();
-  });
 
   loadRoutine();
   renderRoutine();

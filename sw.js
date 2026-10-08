@@ -1,4 +1,4 @@
-const CACHE_NAME = 'braise-v2';
+const CACHE_NAME = 'braise-v3';
 const FILES_TO_CACHE = [
   './',
   './index.html',
