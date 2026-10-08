@@ -312,6 +312,31 @@ h2 {
   render();
 
 // --- Brief du matin ---
+function renderBrief(data) {
+  const el = document.getElementById('brief-section');
+  const section = (title, items) => {
+    if (!items || items.length === 0) return '';
+    return `<h3>${title}</h3><ul class="item-list">${items.map(i => `<li><span>${i}</span></li>`).join('')}</ul>`;
+  };
+
+  let html = '';
+  html += section('Agenda — aujourd\'hui', data.agenda?.today);
+  html += section('Agenda — demain', data.agenda?.tomorrow);
+  html += section('Les 5 jours qui viennent', data.agenda?.upcoming);
+  html += section('Tâches — aujourd\'hui', data.tasks?.today);
+  html += section('Tâches — demain', data.tasks?.tomorrow);
+  html += section('Tâches — priorité haute à venir', data.tasks?.high_priority_upcoming);
+  html += section('E-mails à traiter', data.emails?.to_handle);
+  html += section('E-mails importants', data.emails?.important);
+  if (data.emails && data.emails.promo_count > 0) {
+    html += `<p style="color:#888;">${data.emails.promo_count} promo(s)/newsletter(s)</p>`;
+  }
+  if (data.habits) html += `<h3>Habitudes</h3><p>${data.habits}</p>`;
+  if (data.reminder) html += `<p style="font-weight:bold; color:#e25822;">${data.reminder}</p>`;
+
+  el.innerHTML = html || '<p style="color:#888;">Brief pas encore disponible.</p>';
+}
+
 const DRIVE_API_KEY = 'AIzaSyCeU-mU3kGhP7ofJdw54Qd6g2thCJNlbRI';
 const DRIVE_FOLDER_ID = '1Ge8QOjOnjxz4Q5ux2oOx1WA0fW8YGMz2';
 
@@ -339,19 +364,6 @@ fetchLatestBrief()
   .catch(() => {
     document.getElementById('brief-section').innerHTML = '<p style="color:#888;">Brief pas encore disponible.</p>';
   });
-
-// --- Routine quotidienne ---
-  const routineList = document.getElementById('routine-list');
-
-  const DEFAULT_ROUTINE = [
-    "Un grand verre d'eau",
-    "Le brief du matin",
-    "Manger",
-    "Sortir Tino",
-    "Sport",
-    "Check mail",
-    "Postulation"
-  ];
 
   let routine = [];
 
