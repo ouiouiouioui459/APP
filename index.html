@@ -150,11 +150,24 @@ h2 {
   color: #bbb;
   white-space: pre-wrap;
 }
+#routine-summary {
+  color: #888;
+  font-size: 0.9rem;
+  margin: -8px 0 12px 0;
+}
   </style>
 </head>
 <body>
     <div class="app">
   <h1>BRAISE</h1>
+
+      <h2>Routine quotidienne</h2>
+      <p id="routine-summary"></p>
+  <div class="add-task">
+    <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
+    <button id="add-routine-btn">Ajouter</button>
+  </div>
+  <ul id="routine-list" class="item-list"></ul>
 
   <div class="add-task">
     <input type="text" id="new-task" placeholder="Nouvelle tâche...">
@@ -162,13 +175,6 @@ h2 {
   </div>
 
 <ul id="task-list" class="item-list"></ul>
-
-    <h2>Routine quotidienne</h2>
-  <div class="add-task">
-    <input type="text" id="new-routine" placeholder="Nouvelle habitude...">
-    <button id="add-routine-btn">Ajouter</button>
-  </div>
-  <ul id="routine-list" class="item-list"></ul>
 
   <h2>Notes en vrac</h2>
 <div class="add-note">
@@ -282,6 +288,8 @@ h2 {
 
   function renderRoutine() {
     routineList.innerHTML = '';
+      const doneCount = routine.filter(item => item.done).length;
+  document.getElementById('routine-summary').textContent = `${doneCount}/${routine.length} faites`;
     routine.forEach(item => {
       const li = document.createElement('li');
       li.className = item.done ? 'done' : '';
@@ -455,6 +463,12 @@ h2 {
 
   loadProjects();
   renderProjects();
+
+  if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Service worker enregistré'))
+    .catch((err) => console.error('Erreur service worker', err));
+}
 </script>
 </body>
 </html>
